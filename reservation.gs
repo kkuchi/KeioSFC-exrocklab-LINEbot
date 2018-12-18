@@ -33,6 +33,8 @@ function reservation(text, username, userId){
     // IDの後ろのセミコロンはキャンセル時にIDをmatchで抽出するために付ける
     event.setDescription("予約者："+ username + "\nID:"+ userId + ";");
     replyMessage = Utilities.formatDate(date, "JST", "MM月dd日")+ "(" + youbi[date.getDay()] + ") " + num + "限の予約が完了したよ！";
+    // logSheetに予約入力の日時と予約した日付時限、タイトル、予約者を記録。setValuesは1行でも２次元配列なので注意
+    logSheet.getRange(logSheet.getLastRow()+1, 1, 1,5).setValues([[new Date(), date, num, event.getTitle(), username]]);
   }else{
     replyMessage = "既に他のバンドが予約しているみたい・・・";
   }
@@ -63,11 +65,32 @@ function cancel(text, userId){
       event.setTitle(num+"限");
       event.setDescription("");
       replyMessage = Utilities.formatDate(date, "JST", "MM月dd日") + "(" + youbi[date.getDay()] + ") " + num + "限の予約を取り消したよ！";
+      // キャンセルした予約の背景はグレーに
+      grayCell(date, num);
+      // logSheetにキャンセル日時、予約した日付時限、"キャンセル"を記録。setValuesは2次元配列
+      logSheet.getRange(logSheet.getLastRow()+1,1, 1,4).setValues([[new Date(), date, num, "キャンセル"]]);
     }else{
       replyMessage = "指定したコマの予約は違う人がしたみたい...\n予約の取り消しは予約した人にお願いしてね！";
     }
   }else{
     replyMessage = "指定したコマには予約がないみたいです...\n取り消したい予約を確認してね！";
+  }
+}
+
+// キャンセルした予約が記録されているセルの背景色をグレーにする関数
+function grayCell(date, num){
+  // 現在の最終行
+  var lRow = logSheet.getLastRow();
+  // logSheetのBC列（予約した日付と時限）取得
+  var logs = logSheet.getRange(2,2, lRow-1,2).getValues().reverse();
+  for(var i=0; i<logs.length; i++){
+    // 日付の一致は年月日を取得して合わせないといけないのでめんどい。Moment.js入れた方が良いかも
+    if(logs[i][0].getFullYear() == date.getFullYear() && logs[i][0].getMonth() == date.getMonth() && logs[i][0].getDate() == date.getDate() && logs[i][1] == num){
+      // logsで配列をreverseしたので行数は一番下から遡っていく
+      logSheet.getRange(lRow-i,1,1,5).setBackground("#aaaaaa");
+      // 該当行をグレーにしたらループを抜ける
+      break;
+    }
   }
 }
 

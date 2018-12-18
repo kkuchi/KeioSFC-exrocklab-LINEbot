@@ -1,6 +1,8 @@
 var CHANNEL_ACCESS_TOKEN = "XXXXXXXXXXXXXXXXX";
 var cal = CalendarApp.getCalendarById("ここにカレンダーIDを入力してね"); // カレンダーを指定。カレンダーにはあらかじめ0〜7限のイベントを入れておく。
-var sheet = SpreadsheetApp.openById("ここにスプレッドシートIDを入力してね").getSheetByName("エラー報告");// エラー報告用のスプレッドシートの「エラー報告」というシートを取得
+var sheets = SpreadsheetApp.openById("ここにスプレッドシートIDを入力してね");// bot用にスプレッドシートファイルを作成しておく
+var sheet = sheets.getSheetByName("エラー報告");// エラー報告用のシート「エラー報告」を取得
+var logSheet = sheets.getSheetByName("予約履歴");// 予約の履歴を残すためのシート「予約履歴」を取得
 var replyMessage; // 返信用メッセージ
 var tutorial = "部室を予約したいときは\n【予約:日付, 時限（数字のみ）, バンド名】と言ってね！\n項目の区切りはコロン、数字は半角、日付数字とスラッシュで「年/月/日」みたいに指定してね！\n\n今日の予約を確認したいときは【今日の予約】、 日付を指定して予約確認したいときは【'任意の日付'の予約】と言ってね！この時の日付は予約と同様スラッシュ区切りの半角数字でお願いします！";
 var youbi = ["日","月", "火", "水", "木", "金", "土"]; // Dateの曜日は英語表記なので日本語にするために用意する
