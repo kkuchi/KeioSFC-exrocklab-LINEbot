@@ -4,7 +4,7 @@ var sheets = SpreadsheetApp.openById("ここにスプレッドシートIDを入�
 var sheet = sheets.getSheetByName("エラー報告");// エラー報告用のシート「エラー報告」を取得
 var logSheet = sheets.getSheetByName("予約履歴");// 予約の履歴を残すためのシート「予約履歴」を取得
 var replyMessage; // 返信用メッセージ
-var tutorial = "部室を予約したいときは\n【予約:日付, 時限（数字のみ）, バンド名】と言ってね！\n項目の区切りはコロン、数字は半角、日付数字とスラッシュで「年/月/日」みたいに指定してね！\n\n今日の予約を確認したいときは【今日の予約】、 日付を指定して予約確認したいときは【'任意の日付'の予約】と言ってね！この時の日付は予約と同様スラッシュ区切りの半角数字でお願いします！";
+var lastRow = sheet.getLastRow();
 var youbi = ["日","月", "火", "水", "木", "金", "土"]; // Dateの曜日は英語表記なので日本語にするために用意する
 
 function doPost(e) {
@@ -19,7 +19,7 @@ function doPost(e) {
 
   if(event.type == 'follow') {
 //    botがユーザーにフォローされた時の処理
-    replyMessage = "友達追加ありがとう！\n" + tutorial;
+    replyMessage = "友達追加ありがとう！\n「使い方」と送ってくれれば使い方を説明するよ！";
   }
 
   if(event.type == 'join'){
@@ -40,12 +40,30 @@ function doPost(e) {
       targetDayReservation(date, event);
     }else if(userMessage.match(/予約:.*?/) || userMessage.match(/予約：.*?/)){
       reservation(userMessage, nickname, userId);
-    }else if(userMessage.match(/取り消し：.*?/) || userMessage.match(/取り消し:.*?/)){
+    }else if(userMessage.match(/キャンセル:.*?/) || userMessage.match(/キャンセル：.*?/) || userMessage.match(/取り消し：.*?/) || userMessage.match(/取り消し:.*?/)){
       cancel(userMessage, userId);
     }else if(userMessage == "使い方" || userMessage == "使いかた" || userMessage == "つかいかた"){
-      replyMessage = tutorial;
+//      replyMessage = tutorial;
+      replyFlex(event, "部室ちゃんⅡ世の使い方", fTutorial);
+    }else if(userMessage == "予約履歴"){
+      replyMessage = "予約履歴のシートのURLだよ！\nここに予約履歴シートの共有URLを入力してね";
     }else if(userMessage == "カレンダー"){
-      replyMessage = "カレンダーのURLだよ！\nここにカレンダーの公開URLを入力してね！";
+      replyMessage = "カレンダーのURLだよ！\nここにカレンダーの公開URLを入力してね";
+    }else if(/バス:.*?/.test(userMessage) || /バス：.*?/.test(userMessage)){
+      var location = userMessage.replace("バス", "").replace(":", "").replace("：", "");
+      var lFlag;
+      var go = true;
+      if(/駅/.test(location) || location == "湘南台"){
+        lFlag = "station";
+      }else if(location == "sfc" || location == "SFC" || location == "キャンパス"){
+        lFlag = "sfc";
+      }else{
+        go = false;
+        replyMessage = "想定外のテキストが入力されたよ！確認してね！";
+      }
+      if(go){
+        replyBusTime(location, lFlag);
+      }
     }
     replyText(event);
   }

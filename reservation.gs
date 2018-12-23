@@ -42,8 +42,8 @@ function reservation(text, username, userId){
 
 // 予約キャンセルのための関数
 function cancel(text, userId){
-  // ↓textから「取り消し」とコロン（全角半角）を除去
-  var textData = text.replace("取り消し", "").replace(":", "").replace("：", "");
+  // ↓textから「キャンセル」「取り消し」とコロン（全角半角）を除去
+  var textData = text.replace("取り消し", "").replace("キャンセル", "").replace(":", "").replace("：", "");
   //  ↓カンマまでを抽出
   var dateString = textData.match(/.*?,/)[0];
   var date;
@@ -67,7 +67,7 @@ function cancel(text, userId){
       replyMessage = Utilities.formatDate(date, "JST", "MM月dd日") + "(" + youbi[date.getDay()] + ") " + num + "限の予約を取り消したよ！";
       // キャンセルした予約の背景はグレーに
       grayCell(date, num);
-      // logSheetにキャンセル日時、予約した日付時限、"キャンセル"を記録。setValuesは2次元配列
+      // logSheetにキャンセル日時、予約した日付時限、"キャンセル"を記録。setValuesは２次元配列
       logSheet.getRange(logSheet.getLastRow()+1,1, 1,4).setValues([[new Date(), date, num, "キャンセル"]]);
     }else{
       replyMessage = "指定したコマの予約は違う人がしたみたい...\n予約の取り消しは予約した人にお願いしてね！";
@@ -81,7 +81,7 @@ function cancel(text, userId){
 function grayCell(date, num){
   // 現在の最終行
   var lRow = logSheet.getLastRow();
-  // logSheetのBC列（予約した日付と時限）取得
+  //logSheetのBC列（予約した日付と時限）取得
   var logs = logSheet.getRange(2,2, lRow-1,2).getValues().reverse();
   for(var i=0; i<logs.length; i++){
     // 日付の一致は年月日を取得して合わせないといけないのでめんどい。Moment.js入れた方が良いかも
