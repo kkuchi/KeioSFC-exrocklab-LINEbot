@@ -90,20 +90,28 @@ function getAvailableBus(hour, min, values, str, col){
   // 出発点・曜日から終バスの時間を出しておく
   var lbTime = jpTimeJudge(true, lasts[str][col-2]);
 
+  Logger.log(values);
+  // 時をまたぐかどうかの判定
+  var straddle = false;
   // valuesの行数分だけ繰り返し
-  for(var j=0; j<values[0].length; j++){
+  for(var j=0; j<values.length; j++){
     // 1行取り出してvalueに入れる
     value = values[j][0].split(",");
-    for(var i=0; i<values[0][0].split(",").length; i++){
+    Logger.log(value);
+    for(var i=0; i<values[j][0].split(",").length; i++){
       // valueの数字が現在の時間より小さい場合はこのループを飛ばす
-      if(min > value[i].replace("r", "").replace("t", "").replace("s", "")) continue;
+      Logger.log("min:"+min+ "\nvalue[i]:" +value[i]);
+      if(!straddle && min > value[i].replace("r", "").replace("t", "").replace("s", "")) continue;
       // ロータリー、ツイン、笹久保経由の判定とデータの整型
       var result = jpTimeJudge(false, value[i], hour+j);
+      Logger.log("result:"+result);
       data.push(result);
       // 今pushしたデータが終バスの時間と一致した場合ループを抜ける
       if(result == lbTime) break;
       // dataが3つになった時も同様
       if(data.length > 2) break;
+      // dataが3つより小さい場合はstraddleをtrueに
+      else straddle = true;
     }
     // 最後にpushしたデータが終バスと一致したら「これが終バス！」を追加してbreak
     if(data[data.length-1] == lbTime) {
