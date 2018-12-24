@@ -12,7 +12,6 @@ var firsts = {
 };
 
 function replyBusTime(str, flag){
-  // テスト用に日付が指定できるようになっているのでデプロイ時には消すこと！
   var now = new Date();
   // 曜日によって参照する列を変える
   var col;
@@ -92,7 +91,7 @@ function getAvailableBus(hour, min, values, str, col){
 
   Logger.log(values);
   // 時をまたぐかどうかの判定
-  var straddle = false;
+  var step = false;
   // valuesの行数分だけ繰り返し
   for(var j=0; j<values.length; j++){
     // 1行取り出してvalueに入れる
@@ -101,7 +100,7 @@ function getAvailableBus(hour, min, values, str, col){
     for(var i=0; i<values[j][0].split(",").length; i++){
       // valueの数字が現在の時間より小さい場合はこのループを飛ばす
       Logger.log("min:"+min+ "\nvalue[i]:" +value[i]);
-      if(!straddle && min > value[i].replace("r", "").replace("t", "").replace("s", "")) continue;
+      if(!step && min > value[i].replace("r", "").replace("t", "").replace("s", "")) continue;
       // ロータリー、ツイン、笹久保経由の判定とデータの整型
       var result = jpTimeJudge(false, value[i], hour+j);
       Logger.log("result:"+result);
@@ -110,8 +109,6 @@ function getAvailableBus(hour, min, values, str, col){
       if(result == lbTime) break;
       // dataが3つになった時も同様
       if(data.length > 2) break;
-      // dataが3つより小さい場合はstraddleをtrueに
-      else straddle = true;
     }
     // 最後にpushしたデータが終バスと一致したら「これが終バス！」を追加してbreak
     if(data[data.length-1] == lbTime) {
@@ -120,11 +117,12 @@ function getAvailableBus(hour, min, values, str, col){
     }
     // dataが3つの時もbreak
     if(data.length > 2) break;
+    // dataが2つ以下の時はstepをtrueに
+    else step = true;
   }
   return data;
 }
 
-//------------以下追加分-------------
 function jpTimeJudge(bool, str, hour){
   var log = "";
   // 各種バリエーションを判定してreturnする文章を加えていく
