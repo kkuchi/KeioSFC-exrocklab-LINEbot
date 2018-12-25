@@ -44,7 +44,7 @@ function flexCalendar(date, contents) {
           "margin": "xxl",
           "spacing": "sm",
           "contents": contents
-        }
+        }        
       ]
     }
   }

@@ -1,4 +1,4 @@
-var busSheets = SpreadsheetApp.openById('バス時刻表のシートIDを入力');
+var busSheets = SpreadsheetApp.openById(getBusSheetId());
 var holidays = CalendarApp.getCalendarById('ja.japanese#holiday@group.v.calendar.google.com');// 日本の祝日のgoogleカレンダー
 // 出発バス停、曜日（平日、土曜、日曜）毎の終バス
 var lasts = {
