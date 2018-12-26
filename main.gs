@@ -1,11 +1,11 @@
-var CHANNEL_ACCESS_TOKEN = "XXXXXXXXXXXXXXXXX";
-var cal = CalendarApp.getCalendarById("ここにカレンダーIDを入力してね"); // カレンダーを指定。カレンダーにはあらかじめ0〜7限のイベントを入れておく。
-var sheets = SpreadsheetApp.openById("ここにスプレッドシートIDを入力してね");// bot用にスプレッドシートファイルを作成しておく
-var sheet = sheets.getSheetByName("エラー報告");// エラー報告用のシート「エラー報告」を取得
-var logSheet = sheets.getSheetByName("予約履歴");// 予約の履歴を残すためのシート「予約履歴」を取得
-var replyMessage; // 返信用メッセージ
-var tutorial = "部室を予約したいときは\n【予約:日付, 時限（数字のみ）, バンド名】と言ってね！\n項目の区切りはコロン、数字は半角、日付数字とスラッシュで「年/月/日」みたいに指定してね！\n\n今日の予約を確認したいときは【今日の予約】、 日付を指定して予約確認したいときは【'任意の日付'の予約】と言ってね！この時の日付は予約と同様スラッシュ区切りの半角数字でお願いします！";
-var youbi = ["日","月", "火", "水", "木", "金", "土"]; // Dateの曜日は英語表記なので日本語にするために用意する
+var CHANNEL_ACCESS_TOKEN = getAccessToken();
+var cal = CalendarApp.getCalendarById(getCalendarId());
+var sheets = SpreadsheetApp.openById(getSheetId());
+var sheet = sheets.getSheetByName("エラー報告");// エラー報告用のスプレッドシート
+var logSheet = sheets.getSheetByName("予約履歴");
+var lastRow = sheet.getLastRow();
+var replyMessage;
+var youbi = ["日","月", "火", "水", "木", "金", "土"]; // Date型の曜日表記を日本語に修正するため
 
 function doPost(e) {
   var event = JSON.parse(e.postData.contents).events[0];
@@ -17,11 +17,11 @@ function doPost(e) {
   var userId = event.source.userId;
   var nickname = getUserProfile(userId);
 
-  if(event.type == 'follow') {
+  if(event.type == 'follow') { 
 //    botがユーザーにフォローされた時の処理
-    replyMessage = "友達追加ありがとう！\n" + tutorial;
+    replyMessage = "友達追加ありがとう！\n「使い方」と送ってくれれば使い方を説明するよ！";
   }
-
+  
   if(event.type == 'join'){
   }
 
@@ -35,17 +35,35 @@ function doPost(e) {
       errorReport(userMessage, nickname);
     }else if(userMessage == "今日の予約"){
       todaysReservation(event);
-    }else if(userMessage.match(/.*?の予約/)){
-      var date = userMessage.replace("の予約", "");
+    }else if(/.*?の予約/.test(userMessage)){
+      var date = userMessage.match(/.*?の予約/)[0].replace("の予約", "");
       targetDayReservation(date, event);
     }else if(userMessage.match(/予約:.*?/) || userMessage.match(/予約：.*?/)){
       reservation(userMessage, nickname, userId);
-    }else if(userMessage.match(/取り消し：.*?/) || userMessage.match(/取り消し:.*?/)){
+    }else if(userMessage.match(/キャンセル:.*?/) || userMessage.match(/キャンセル：.*?/) || userMessage.match(/取り消し：.*?/) || userMessage.match(/取り消し:.*?/)){
       cancel(userMessage, userId);
     }else if(userMessage == "使い方" || userMessage == "使いかた" || userMessage == "つかいかた"){
-      replyMessage = tutorial;
+//      replyMessage = tutorial;
+      replyFlex(event, "部室ちゃんⅡ世の使い方", fTutorial);
+    }else if(userMessage == "予約履歴"){
+      replyMessage = "予約履歴のシートのURLだよ！\n" + getSheetUrl();
     }else if(userMessage == "カレンダー"){
-      replyMessage = "カレンダーのURLだよ！\nここにカレンダーの公開URLを入力してね！";
+      replyMessage = "カレンダーのURLだよ！\n" + getCalendarUrl();
+    }else if(/バス:.*?/.test(userMessage) || /バス：.*?/.test(userMessage)){
+      var location = userMessage.replace("バス", "").replace(":", "").replace("：", "");
+      var lFlag;
+      var go = true;
+      if(/駅/.test(location) || location == "湘南台"){
+        lFlag = "station";
+      }else if(location == "sfc" || location == "SFC" || location == "キャンパス"){
+        lFlag = "sfc";
+      }else{
+        go = false;
+        replyMessage = "想定外のテキストが入力されたよ！確認してね！";
+      }
+      if(go){
+        replyBusTime(location, lFlag);
+      }
     }
     replyText(event);
   }
@@ -61,7 +79,7 @@ function errorReport(text, nickname){
 }
 
 // profileを取得してくる関数
-function getUserProfile(userId){
+function getUserProfile(userId){ 
   var url = 'https://api.line.me/v2/bot/profile/' + userId;
   var userProfile = UrlFetchApp.fetch(url,{
     'headers': {

@@ -7,11 +7,15 @@
 - 予約
 - 予約確認(当日/日付指定)
 - 予約取り消し
+- バス時刻表
 - 使い方
 - カレンダーURL
+- 予約履歴シートURL
+- エラー報告
 
 #### スクリプトファイル
 - main.gs
 - reservation.gs
 - flex.gs
 - reply.gs
+- bus.gs
