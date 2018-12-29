@@ -20,6 +20,7 @@ function doPost(e) {
   if(event.type == 'follow') { 
 //    botがユーザーにフォローされた時の処理
     replyMessage = "友達追加ありがとう！\n「使い方」と送ってくれれば使い方を説明するよ！";
+    replyText(event);
   }
   
   if(event.type == 'join'){
@@ -42,13 +43,6 @@ function doPost(e) {
       reservation(userMessage, nickname, userId);
     }else if(userMessage.match(/キャンセル:.*?/) || userMessage.match(/キャンセル：.*?/) || userMessage.match(/取り消し：.*?/) || userMessage.match(/取り消し:.*?/)){
       cancel(userMessage, userId);
-    }else if(userMessage == "使い方" || userMessage == "使いかた" || userMessage == "つかいかた"){
-//      replyMessage = tutorial;
-      replyFlex(event, "部室ちゃんⅡ世の使い方", fTutorial);
-    }else if(userMessage == "予約履歴"){
-      replyMessage = "予約履歴のシートのURLだよ！\n" + getSheetUrl();
-    }else if(userMessage == "カレンダー"){
-      replyMessage = "カレンダーのURLだよ！\n" + getCalendarUrl();
     }else if(/バス:.*?/.test(userMessage) || /バス：.*?/.test(userMessage)){
       var location = userMessage.replace("バス", "").replace(":", "").replace("：", "");
       var lFlag;
@@ -64,6 +58,18 @@ function doPost(e) {
       if(go){
         replyBusTime(location, lFlag);
       }
+    }else if(userMessage == "使い方" || userMessage == "使いかた" || userMessage == "つかいかた"){
+      replyFlex(event, "部室ちゃんⅡ世の使い方", fTutorial);
+    }else if(userMessage == "予約履歴"){
+      replyMessage = "予約履歴のシートのURLだよ！\n" + getSheetUrl();
+    }else if(userMessage == "カレンダー"){
+      replyMessage = "カレンダーのURLだよ！\n" + getCalendarUrl();
+    }else if(userMessage == "鍵"){
+      isOpen();
+    }else if(userMessage == "解錠" || userMessage == "開錠"){
+      open(nickname);
+    }else if(userMessage == "施錠"){
+      close(nickname);
     }
     replyText(event);
   }

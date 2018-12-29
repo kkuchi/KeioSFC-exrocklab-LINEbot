@@ -353,6 +353,40 @@ var fTutorial = {
             "contents": [
               {
                 "type": "text",
+                "text": "鍵",
+                "weight": "bold",
+                "size": "lg",
+                "margin": "md",
+                "color": "#555555",
+                "flex": 0
+              },
+              {
+                "type": "text",
+                "text": "例：「鍵」「施錠」「解錠」",
+                "size": "md",
+                "margin": "md",
+                "color": "#333333",
+                "align": "end"
+              },
+              {
+                "type": "text",
+                "text": "部室の鍵の状況が分かります。「鍵」で今鍵が開いているかどうかが分かり、「施錠」「解錠」で鍵の開け閉めを記録します。",
+                "wrap": true,
+                "size": "md",
+                "margin": "xs",
+                "color": "#777777"
+              },
+              {
+                "type": "separator",
+                "margin": "md"
+              }
+            ]
+          },{
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
                 "text": "エラー報告",
                 "weight": "bold",
                 "size": "lg",
